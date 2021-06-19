@@ -1,14 +1,21 @@
-import React, { Component } from "react";
+import React from "react";
 import Pagination from "@material-ui/lab/Pagination";
 
-class MoviePagination extends Component {
-  render() {
-    return (
-      <div>
-        <Pagination count={10} variant="outlined" />
-      </div>
-    );
-  }
-}
+const MoviePagination = ({ numMovies, onChange, pageSize }) => {
+  const pageCount = Math.ceil(numMovies / pageSize);
+  console.log(`PageCount: ${pageCount}`);
+
+  if (pageCount === 1) return null;
+  return (
+    <div>
+      <Pagination
+        count={pageCount}
+        onChange={onChange}
+        variant="outlined"
+        shape="rounded"
+      />
+    </div>
+  );
+};
 
 export default MoviePagination;
