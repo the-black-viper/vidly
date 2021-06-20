@@ -9,6 +9,8 @@ import Paper from "@material-ui/core/Paper";
 import { Button } from "@material-ui/core";
 import MoviePagination from "./pagination";
 import Paginate from "../utils/paginate";
+import GenreFilter from "./genre-filter";
+import moviesInGenre from "../utils/sortedGenre";
 
 const MovieTable = ({
   movieList,
@@ -16,11 +18,20 @@ const MovieTable = ({
   onChange,
   currentPage,
   pageSize,
+  genre,
+  onGenreChange,
 }) => {
-  const startIndex = (currentPage - 1) * pageSize;
+  // Get all movie genres
+  const allGenres = movieList.map((m) => m.genre.name);
+  // Filter and get unique genres
+  const uniqueGenres = [...new Set(allGenres)];
+  // Get all movies in the genre;
+  const filteredMovies = moviesInGenre(movieList, genre);
 
-  const movies = Paginate(movieList, startIndex, pageSize);
-  // console.log(Paginate(movies, startIndex, 2));
+  // Get starting index of the first movie to displayed in a page
+  const startIndex = (currentPage - 1) * pageSize;
+  // Get movies to be displayed per page
+  const movies = Paginate(filteredMovies, startIndex, pageSize);
 
   return (
     <React.Fragment>
@@ -61,10 +72,11 @@ const MovieTable = ({
         </Table>
       </TableContainer>
       <MoviePagination
-        numMovies={movieList.length}
+        numMovies={filteredMovies.length}
         onChange={onChange}
         pageSize={pageSize}
       />
+      <GenreFilter onChange={onGenreChange} genres={uniqueGenres} />
     </React.Fragment>
   );
 };

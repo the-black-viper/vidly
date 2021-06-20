@@ -6,6 +6,7 @@ import { getMovies } from "./services/fakeMovieService";
 function App() {
   const moviesPerPage = 5;
   const [currentPage, setPage] = useState(1);
+  const [genre, setGenre] = useState("all");
 
   const handleChange = (event, value) => {
     console.log("Page Changed", value);
@@ -25,6 +26,10 @@ function App() {
     setMovies(movies.filter((m) => m._id !== movieID));
   };
 
+  const handleGenre = (genre) => {
+    setGenre(genre);
+  };
+
   return (
     <div className="App">
       <Movies
@@ -33,7 +38,10 @@ function App() {
         onChange={handleChange}
         currentPage={currentPage}
         pageSize={moviesPerPage}
+        genre={genre}
+        onGenreChange={handleGenre}
       />
+      {/* <GenreFilter /> */}
     </div>
   );
 }
