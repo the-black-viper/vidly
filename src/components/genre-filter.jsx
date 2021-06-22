@@ -12,7 +12,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-// Props: Genres, Handle Genre Change
 const GenreFilter = ({ onChange, genres }) => {
   const classes = useStyles();
   return (

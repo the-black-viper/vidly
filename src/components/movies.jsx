@@ -1,25 +1,21 @@
 import React from "react";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
-import { Button } from "@material-ui/core";
+import MoviesTable from "./movies-table";
 import MoviePagination from "./pagination";
 import Paginate from "../utils/paginate";
 import GenreFilter from "./genre-filter";
 import moviesInGenre from "../utils/sortedGenre";
+import orderBy from "../utils/sortBy";
 
-const MovieTable = ({
+const Movies = ({
   movieList,
   onDelete,
   onChange,
+  onSort,
   currentPage,
   pageSize,
   genre,
   onGenreChange,
+  sortColumn,
 }) => {
   // Get all movie genres
   const allGenres = movieList.map((m) => m.genre.name);
@@ -28,49 +24,23 @@ const MovieTable = ({
   // Get all movies in the genre;
   const filteredMovies = moviesInGenre(movieList, genre);
 
+  const sortedMovies = filteredMovies
+    .concat()
+    .sort(orderBy([sortColumn.path], [sortColumn.order]));
+
   // Get starting index of the first movie to displayed in a page
   const startIndex = (currentPage - 1) * pageSize;
   // Get movies to be displayed per page
-  const movies = Paginate(filteredMovies, startIndex, pageSize);
+  const movies = Paginate(sortedMovies, startIndex, pageSize);
 
   return (
     <React.Fragment>
-      <TableContainer component={Paper}>
-        <Table aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell align="left">Title</TableCell>
-              <TableCell align="center"> Genre </TableCell>
-              <TableCell align="center"> Rental rate </TableCell>
-              <TableCell align="center"> Stock </TableCell>
-              <TableCell> </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {movies.map((movie) => (
-              <TableRow key={movie._id}>
-                <TableCell component="th" scope="row" align="left">
-                  {movie.title}
-                </TableCell>
-                <TableCell align="center">{movie.genre.name}</TableCell>
-                <TableCell align="center">{movie.dailyRentalRate}</TableCell>
-                <TableCell align="center">{movie.numberInStock}</TableCell>
-                <TableCell align="center">
-                  <Button
-                    onClick={() => {
-                      onDelete(movie._id);
-                    }}
-                    variant="contained"
-                    color="secondary"
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <MoviesTable
+        movies={movies}
+        onDelete={onDelete}
+        onSort={onSort}
+        sortColumn={sortColumn}
+      />
       <MoviePagination
         numMovies={filteredMovies.length}
         onChange={onChange}
@@ -81,4 +51,4 @@ const MovieTable = ({
   );
 };
 
-export default MovieTable;
+export default Movies;
