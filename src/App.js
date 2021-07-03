@@ -1,7 +1,14 @@
-import "./App.css";
+// import "./App.css";
 import Movies from "./components/movies";
 import React, { useState } from "react";
 import { getMovies } from "./services/fakeMovieService";
+import { Route, Switch, Redirect } from "react-router-dom";
+import NavBar from "./components/navbar";
+import NotFound from "./components/notFound";
+import Customer from "./components/customer";
+import Rentals from "./components/rentals";
+import MovieForm from "./components/movieForm";
+import SignIn from "./components/login";
 
 function App() {
   const moviesPerPage = 5;
@@ -44,17 +51,35 @@ function App() {
 
   return (
     <div className="App">
-      <Movies
-        movieList={movies}
-        sortColumn={sortPath}
-        currentPage={currentPage}
-        pageSize={moviesPerPage}
-        genre={genre}
-        onChange={handleChange}
-        onDelete={handleDelete}
-        onGenreChange={handleGenre}
-        onSort={handleSort}
-      />
+      <NavBar />
+      <div className="content">
+        <Switch>
+          <Route path="/login" component={SignIn} />
+          <Route path="/movies/:id" component={MovieForm} />
+          <Route
+            path="/movies"
+            render={() => (
+              <Movies
+                movieList={movies}
+                sortColumn={sortPath}
+                currentPage={currentPage}
+                pageSize={moviesPerPage}
+                genre={genre}
+                onChange={handleChange}
+                onDelete={handleDelete}
+                onGenreChange={handleGenre}
+                onSort={handleSort}
+              />
+            )}
+          />
+          <Redirect from="/" exact to="/movies" />
+          <Route path="/customers" component={Customer} />
+          <Route path="/not-found" component={NotFound} />
+          <Route path="/rentals" component={Rentals} />
+
+          <Redirect to="/not-found" />
+        </Switch>
+      </div>
     </div>
   );
 }

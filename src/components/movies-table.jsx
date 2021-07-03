@@ -7,6 +7,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { Button } from "@material-ui/core";
+import { Link } from "react-router-dom";
 
 const get = (obj, path, defValue) => {
   // If path is not defined or it has false value
@@ -25,7 +26,13 @@ const get = (obj, path, defValue) => {
 
 const MoviesTable = ({ movies, sortColumn, onSort, onDelete }) => {
   const sortPaths = [
-    { path: "title", label: "Title" },
+    {
+      path: "title",
+      label: "Title",
+      content: (movie) => {
+        return <Link to={`/movies/${movie._id}`}>{movie.title}</Link>;
+      },
+    },
     { path: "genre.name", label: "Genre" },
     { path: "dailyRentalRate", label: "Rental Rate" },
     { path: "numberInStock", label: "Stock" },
@@ -66,7 +73,7 @@ const MoviesTable = ({ movies, sortColumn, onSort, onDelete }) => {
                 onClick={() => {
                   onSort(item.path, sortColumn.order);
                 }}
-                align="left"
+                align="center"
               >
                 {item.label}
               </TableCell>
