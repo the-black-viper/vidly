@@ -13,6 +13,18 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import { useState } from "react";
+import combinedSchema from "../utils/validateSchema";
+import { emailSchema, passwordSchema } from "../utils/validateSchema";
+import { useEffect } from "react";
+import { useRef } from "react";
+
+function validateInput(input, schema) {
+  const result = schema.validate(input);
+  console.log(result);
+  const noError = !Object.keys(result).includes("error");
+  // console.log(noError);
+  return noError;
+}
 
 function Copyright() {
   return (
@@ -51,55 +63,48 @@ export default function SignIn() {
   const [account, setAccount] = useState({ email: "", password: "" });
   const [errorFlag, setError] = useState({ email: false, password: false });
   const [helperText, setHelperText] = useState({ email: "", password: "" });
+  const [disabledFlag, setDisable] = useState(false);
   const classes = useStyles();
 
+  // Hook to disable submit button
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      const validAccount = validateInput(account, combinedSchema);
+      const withError = Object.keys(errorFlag).some((k) => errorFlag[k]);
+      validAccount && !withError ? setDisable(false) : setDisable(true);
+    }
+  }, [account]);
+
+  // Handle Password and Email Change
   const handleChange = (event) => {
-    const name = event.currentTarget.name;
-    const value = event.currentTarget.value;
-    let tempAccount = { ...account };
+    const value = event.target.value;
+    const name = event.target.name;
+    const tempObject = { [name]: value };
+    console.log(tempObject);
+    const tempError = { ...errorFlag };
+    const inputValid =
+      name === "email"
+        ? validateInput(tempObject, emailSchema)
+        : validateInput(tempObject, passwordSchema);
+    inputValid ? (tempError[name] = false) : (tempError[name] = true);
+    setError(tempError);
+
+    const tempAccount = { ...account };
     tempAccount[name] = value;
     setAccount(tempAccount);
   };
 
-  const validate = (object) => {
-    const tempErrors = { ...errorFlag };
-    const tempText = { ...helperText };
-
-    let emailFlag = object.email.trim().length < 2 ? true : false;
-    tempErrors["email"] = emailFlag;
-    let passwordFlag = object.password.trim().length < 2 ? true : false;
-    tempErrors["password"] = passwordFlag;
-
-    let emailText = tempErrors.email ? "Invalid Input" : "";
-    tempText.email = emailText;
-    let passwordText = tempErrors.password ? "Invalid Input" : "";
-    tempText.password = passwordText;
-
-    console.log(tempErrors);
-    setError(tempErrors);
-    setHelperText(tempText);
-
-    let isError = Object.keys(tempErrors).some((k) => tempErrors[k]);
-    return isError;
-  };
-
+  // Submit
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const errors = validate(account);
-    console.log(errors);
-    // // console.log(Object.keys(errors));
-    // if (errors) {
-    //   // setError(true);
-    //   setHelperText("Invalid input");
-    // } else {
-    //   const tempError = { ...errorFlag };
-    //   tempError.email = false;
-    //   tempError.password = false;
-    //   setHelperText("");
-    // }
-    // Call server
-    console.log("Submitted");
+    console.log(errorFlag);
+    const withError = Object.keys(errorFlag).some((k) => errorFlag[k]);
+    withError
+      ? console.error("ERROR Submitting form")
+      : console.log("Submitted");
   };
 
   return (
@@ -150,6 +155,7 @@ export default function SignIn() {
             fullWidth
             variant="contained"
             color="primary"
+            disabled={disabledFlag}
             className={classes.submit}
             onClick={(event) => handleSubmit(event)}
           >
