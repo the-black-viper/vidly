@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect, useRef, useState } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -12,14 +13,12 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import { useState } from "react";
 import {
+  nameSchema,
   emailSchema,
   passwordSchema,
-  loginSchema,
+  registerSchema,
 } from "../utils/validateSchema";
-import { useEffect } from "react";
-import { useRef } from "react";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
@@ -33,7 +32,7 @@ function Copyright() {
     <Typography variant="body2" color="textSecondary" align="center">
       {"Copyright © "}
       <Link color="inherit" href="https://material-ui.com/">
-        Vidly Website
+        Your Website
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
@@ -54,18 +53,27 @@ const useStyles = makeStyles((theme) => ({
   },
   form: {
     width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(3),
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
 }));
 
-export default function SignIn() {
-  const [account, setAccount] = useState({ email: "", password: "" });
-  const [errorFlag, setError] = useState({ email: false, password: false });
-  const [disabledFlag, setDisable] = useState(false);
+export default function Register() {
   const classes = useStyles();
+
+  const [account, setAccount] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+  const [errorFlag, setError] = useState({
+    username: false,
+    email: false,
+    password: false,
+  });
+  const [disabledFlag, setDisable] = useState(false);
 
   // Hook to disable submit button while inputs are invalid
   const isInitialMount = useRef(true);
@@ -73,7 +81,8 @@ export default function SignIn() {
     if (isInitialMount.current) {
       isInitialMount.current = false;
     } else {
-      const validAccount = validateInput(account, loginSchema);
+      console.log(account);
+      const validAccount = validateInput(account, registerSchema);
       validAccount ? setDisable(false) : setDisable(true);
     }
   }, [account]);
@@ -88,6 +97,8 @@ export default function SignIn() {
     const inputValid =
       name === "email"
         ? validateInput(tempObject, emailSchema)
+        : name === "username"
+        ? validateInput(tempObject, nameSchema)
         : validateInput(tempObject, passwordSchema);
     inputValid ? (tempError[name] = false) : (tempError[name] = true);
     setError(tempError);
@@ -115,65 +126,79 @@ export default function SignIn() {
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign in
+          Sign up
         </Typography>
         <form className={classes.form} noValidate>
-          <TextField
-            error={errorFlag.email}
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            onChange={(event) => handleChange(event)}
-          />
-          <TextField
-            error={errorFlag.password}
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            onChange={(event) => handleChange(event)}
-          />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={12}>
+              <TextField
+                autoComplete="uname"
+                error={errorFlag.username}
+                name="username"
+                variant="outlined"
+                required
+                fullWidth
+                id="username"
+                label="Username"
+                onChange={(event) => handleChange(event)}
+                autoFocus
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                error={errorFlag.email}
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                onChange={(event) => handleChange(event)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                error={errorFlag.password}
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                onChange={(event) => handleChange(event)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={<Checkbox value="allowExtraEmails" color="primary" />}
+                label="I want to receive inspiration, marketing promotions and updates via email."
+              />
+            </Grid>
+          </Grid>
           <Button
             type="submit"
             fullWidth
             variant="contained"
             color="primary"
             disabled={disabledFlag}
+            onClick={handleSubmit}
             className={classes.submit}
-            onClick={(event) => handleSubmit(event)}
           >
-            Sign In
+            Sign Up
           </Button>
-          <Grid container>
-            <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid>
+          <Grid container justifycontent="flex-end">
             <Grid item>
               <Link href="#" variant="body2">
-                {"Don't have an account? Sign Up"}
+                Already have an account? Sign in
               </Link>
             </Grid>
           </Grid>
         </form>
       </div>
-      <Box mt={8}>
+      <Box mt={5}>
         <Copyright />
       </Box>
     </Container>

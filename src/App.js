@@ -2,13 +2,16 @@
 import Movies from "./components/movies";
 import React, { useState } from "react";
 import { getMovies } from "./services/fakeMovieService";
-import { Route, Switch, Redirect } from "react-router-dom";
+import { Route, Switch, Redirect, Link } from "react-router-dom";
 import NavBar from "./components/navbar";
 import NotFound from "./components/notFound";
 import Customer from "./components/customer";
 import Rentals from "./components/rentals";
 import MovieForm from "./components/movieForm";
 import SignIn from "./components/login";
+import Register from "./components/register";
+import { Button } from "@material-ui/core";
+import NewMovie from "./components/new-movie";
 
 function App() {
   const moviesPerPage = 5;
@@ -54,24 +57,37 @@ function App() {
       <NavBar />
       <div className="content">
         <Switch>
+          <Route path="/register" component={Register} />
           <Route path="/login" component={SignIn} />
           <Route path="/movies/:id" component={MovieForm} />
+          <Route path="/newmovie" component={NewMovie} />
           <Route
             path="/movies"
             render={() => (
-              <Movies
-                movieList={movies}
-                sortColumn={sortPath}
-                currentPage={currentPage}
-                pageSize={moviesPerPage}
-                genre={genre}
-                onChange={handleChange}
-                onDelete={handleDelete}
-                onGenreChange={handleGenre}
-                onSort={handleSort}
-              />
+              <React.Fragment>
+                <Movies
+                  movieList={movies}
+                  sortColumn={sortPath}
+                  currentPage={currentPage}
+                  pageSize={moviesPerPage}
+                  genre={genre}
+                  onChange={handleChange}
+                  onDelete={handleDelete}
+                  onGenreChange={handleGenre}
+                  onSort={handleSort}
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  component={Link}
+                  to="/newmovie"
+                >
+                  Add Movie
+                </Button>
+              </React.Fragment>
             )}
           />
+
           <Redirect from="/" exact to="/movies" />
           <Route path="/customers" component={Customer} />
           <Route path="/not-found" component={NotFound} />
