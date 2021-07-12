@@ -1,5 +1,3 @@
-import * as genresAPI from "./fakeGenreService";
-
 const movies = [
   {
     _id: "5b21ca3eeb7f6fbccd471815",

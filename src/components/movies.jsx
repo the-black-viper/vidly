@@ -6,7 +6,7 @@ import GenreFilter from "./genre-filter";
 import moviesInGenre from "../utils/sortedGenre";
 import orderBy from "../utils/sortBy";
 import { Button } from "@material-ui/core";
-import { getMovies, saveMovie } from "../services/fakeMovieService";
+import { getMovies } from "../services/fakeMovieService";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
