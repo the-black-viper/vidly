@@ -18,8 +18,9 @@ import {
   genreSchema,
   newMovieSchema,
 } from "../utils/validateSchema";
-import { getMovies } from "../services/fakeMovieService";
+import { getMovies, saveMovie } from "../services/fakeMovieService";
 import { MenuItem } from "@material-ui/core";
+import { useLocation } from "react-router-dom";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
@@ -64,30 +65,59 @@ const useStyles = makeStyles((theme) => ({
 const movies = getMovies().map((movie) => ({
   ...movie,
   id: movie._id,
-  genreName: movie.genre.name,
+  genre: movie.genre.name,
 }));
 
+console.log(movies);
 // Get all movie genres
-const allGenres = movies.map((m) => m.genre.name);
+const allGenres = movies.map((m) => m.genre);
+console.log(allGenres);
 // Filter and get unique genres
 const uniqueGenres = [...new Set(allGenres)];
 console.log(uniqueGenres);
-export default function NewMovie() {
+
+const findMovie = (movies, id) => {
+  const targetMovie = movies.find((movie) => movie.id === id);
+  return targetMovie;
+};
+
+const getMovieData = (props) => {
+  // Get the movie
+  const { match } = props;
+  const movieID = match.params.id;
+  const movie = findMovie(movies, movieID);
+  console.log(movie);
+  const tempAccount = { ...movie };
+  console.log(tempAccount);
+  return tempAccount;
+};
+
+// New Movie Component
+export default function NewMovie(props) {
+  const loc = useLocation();
+  console.log(loc);
+  props ? console.log("props present", props) : console.log("no props");
   const classes = useStyles();
-  const [account, setAccount] = useState({
-    title: "",
-    genre: "",
-    stock: "",
-    rate: "",
-  });
+  const [account, setAccount] = useState(
+    // Check path
+    loc.pathname !== "/newmovie"
+      ? getMovieData(props)
+      : {
+          title: "",
+          genre: "",
+          numberInStock: "",
+          dailyRentalRate: "",
+        }
+  );
+
   const [errorFlag, setError] = useState({
     title: false,
     genre: false,
-    stock: false,
-    rate: false,
+    numberInStock: false,
+    dailyRentalRate: false,
   });
   const [disabledFlag, setDisable] = useState(false);
-  const [selectedGenre, setGenre] = useState("");
+
   // Hook to disable submit button while inputs are invalid
   const isInitialMount = useRef(true);
   useEffect(() => {
@@ -100,23 +130,24 @@ export default function NewMovie() {
     }
   }, [account]);
 
-  // Handle Password and Email Change
+  // Handle input change
   const handleChange = (event) => {
     const value = event.target.value;
     const name = event.target.name;
-    console.log(name, value);
+
     const tempObject = { [name]: value };
-
     const tempError = { ...errorFlag };
-
+    console.log(tempObject);
     const inputValid =
       name === "title"
         ? validateInput(tempObject, titleSchema)
-        : name === "rate"
+        : name === "dailyRentalRate"
         ? validateInput(tempObject, rateSchema)
         : name === "genre"
         ? validateInput(tempObject, genreSchema)
-        : validateInput(tempObject, stockSchema);
+        : name === "numberInStock"
+        ? validateInput(tempObject, stockSchema)
+        : console.error("ERROR");
     console.log(tempError);
     inputValid ? (tempError[name] = false) : (tempError[name] = true);
     console.log(tempError);
@@ -132,9 +163,9 @@ export default function NewMovie() {
     e.preventDefault();
     console.log(errorFlag);
     const withError = Object.keys(errorFlag).some((k) => errorFlag[k]);
-    withError
-      ? console.error("ERROR Submitting form")
-      : console.log("Submitted");
+    if (withError) return console.error("ERROR Submitting form");
+    console.log("Submitted", account);
+    saveMovie(account);
   };
 
   return (
@@ -159,6 +190,7 @@ export default function NewMovie() {
                 fullWidth
                 id="title"
                 label="Title"
+                value={account.title}
                 onChange={(event) => handleChange(event)}
                 autoFocus
               />
@@ -189,25 +221,27 @@ export default function NewMovie() {
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
-                error={errorFlag.stock}
+                error={errorFlag.numberInStock}
+                value={account.numberInStock}
                 required
                 fullWidth
-                id="stock"
+                id="numberInStock"
                 label="Number in Stock"
-                name="stock"
-                autoComplete="stock"
+                name="numberInStock"
+                autoComplete="numberInStock"
                 onChange={(event) => handleChange(event)}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
-                error={errorFlag.rate}
+                error={errorFlag.dailyRentalRate}
+                value={account.dailyRentalRate}
                 required
                 fullWidth
-                id="rate"
+                id="dailyRentalRate"
                 label="Rental Rate"
-                name="rate"
+                name="dailyRentalRate"
                 autoComplete="rate"
                 onChange={(event) => handleChange(event)}
               />

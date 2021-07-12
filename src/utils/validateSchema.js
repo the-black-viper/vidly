@@ -1,4 +1,3 @@
-import React from "react";
 import Joi from "joi";
 
 const strongRegex = new RegExp(
@@ -44,18 +43,21 @@ const genreSchema = Joi.object({
 });
 
 const rateSchema = Joi.object({
-  rate: Joi.number().min(0).max(100).precision(2).required(),
+  dailyRentalRate: Joi.number().min(0).max(100).precision(2).required(),
 });
 
 const stockSchema = Joi.object({
-  stock: Joi.number().min(0).max(100).integer(),
+  numberInStock: Joi.number().min(0).max(100).integer(),
 });
 
 const newMovieSchema = Joi.object({
+  id: Joi.string().optional(),
+  _id: Joi.string().alphanum(),
   title: Joi.string().alphanum().min(3).required(),
   genre: Joi.string().alphanum().required(),
-  rate: Joi.number().min(0).max(100).precision(2).required(),
-  stock: Joi.number().min(0).max(100).integer(),
+  dailyRentalRate: Joi.number().min(0).max(100).precision(2).required(),
+  numberInStock: Joi.number().min(0).max(100).integer(),
+  publishDate: Joi.date().optional(),
 });
 
 const registerSchema = Joi.object({
