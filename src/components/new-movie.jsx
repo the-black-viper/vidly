@@ -62,38 +62,37 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const movies = getMovies().map((movie) => ({
-  ...movie,
-  id: movie._id,
-  genre: movie.genre.name,
-}));
-
-console.log(movies);
-// Get all movie genres
-const allGenres = movies.map((m) => m.genre);
-console.log(allGenres);
-// Filter and get unique genres
-const uniqueGenres = [...new Set(allGenres)];
-console.log(uniqueGenres);
-
-const findMovie = (movies, id) => {
-  const targetMovie = movies.find((movie) => movie.id === id);
-  return targetMovie;
-};
-
-const getMovieData = (props) => {
-  // Get the movie
-  const { match } = props;
-  const movieID = match.params.id;
-  const movie = findMovie(movies, movieID);
-  console.log(movie);
-  const tempAccount = { ...movie };
-  console.log(tempAccount);
-  return tempAccount;
-};
-
 // New Movie Component
 export default function NewMovie(props) {
+  const movies = getMovies().map((movie) => ({
+    ...movie,
+    id: movie._id,
+    genre: movie.genre.name,
+  }));
+
+  console.log(movies);
+  // Get all movie genres
+  const allGenres = movies.map((m) => m.genre);
+  console.log(allGenres);
+  // Filter and get unique genres
+  const uniqueGenres = [...new Set(allGenres)];
+  console.log(uniqueGenres);
+
+  const findMovie = (movies, id) => {
+    const targetMovie = movies.find((movie) => movie.id === id);
+    return targetMovie;
+  };
+
+  const getMovieData = (props) => {
+    // Get the movie
+    const { match } = props;
+    const movieID = match.params.id;
+    const movie = findMovie(movies, movieID);
+    console.log(movie);
+    const tempAccount = { ...movie };
+    console.log(tempAccount);
+    return tempAccount;
+  };
   const loc = useLocation();
   console.log(loc);
   props ? console.log("props present", props) : console.log("no props");
@@ -119,23 +118,31 @@ export default function NewMovie(props) {
   const [disabledFlag, setDisable] = useState(false);
 
   // Hook to disable submit button while inputs are invalid
-  const isInitialMount = useRef(true);
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      console.log(account);
-      const validAccount = validateInput(account, newMovieSchema);
-      validAccount ? setDisable(false) : setDisable(true);
+    console.log(account);
+    // Normalize values in a temporary Values
+    const tempAccount = { ...account };
+    for (let key in tempAccount) {
+      try {
+        console.log(typeof tempAccount[key]);
+        if (typeof tempAccount[key] === "string")
+          tempAccount[key].replace(/\s/g, "");
+      } catch {
+        console.error("ERROR");
+      }
     }
+
+    const validAccount = validateInput(tempAccount, newMovieSchema);
+    validAccount ? setDisable(false) : setDisable(true);
   }, [account]);
 
   // Handle input change
   const handleChange = (event) => {
-    const value = event.target.value;
+    let value = event.target.value;
     const name = event.target.name;
-
-    const tempObject = { [name]: value };
+    const newValue = value.split(" ").join("");
+    // if (typeof value === "string") value.replace(/\s/g, "");
+    const tempObject = { [name]: newValue };
     const tempError = { ...errorFlag };
     console.log(tempObject);
     const inputValid =
@@ -153,8 +160,8 @@ export default function NewMovie(props) {
     console.log(tempError);
     setError(tempError);
 
-    const tempAccount = { ...account };
-    tempAccount[name] = value;
+    const tempAccount = { ...account, [name]: value };
+    // tempAccount[name] = value;
     setAccount(tempAccount);
   };
 
@@ -191,7 +198,7 @@ export default function NewMovie(props) {
                 id="title"
                 label="Title"
                 value={account.title}
-                onChange={(event) => handleChange(event)}
+                onChange={handleChange}
                 autoFocus
               />
             </Grid>
@@ -205,7 +212,7 @@ export default function NewMovie(props) {
                 variant="outlined"
                 label="Genre"
                 value={account.genre}
-                onChange={(event) => handleChange(event)}
+                onChange={handleChange}
               >
                 <MenuItem value="">
                   <em></em>
@@ -229,7 +236,7 @@ export default function NewMovie(props) {
                 label="Number in Stock"
                 name="numberInStock"
                 autoComplete="numberInStock"
-                onChange={(event) => handleChange(event)}
+                onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12}>
@@ -243,7 +250,7 @@ export default function NewMovie(props) {
                 label="Rental Rate"
                 name="dailyRentalRate"
                 autoComplete="rate"
-                onChange={(event) => handleChange(event)}
+                onChange={handleChange}
               />
             </Grid>
           </Grid>

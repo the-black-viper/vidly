@@ -5,7 +5,7 @@ import Paginate from "../utils/paginate";
 import GenreFilter from "./genre-filter";
 import moviesInGenre from "../utils/sortedGenre";
 import orderBy from "../utils/sortBy";
-import { Button } from "@material-ui/core";
+import { Button, InputAdornment, TextField } from "@material-ui/core";
 import { getMovies } from "../services/fakeMovieService";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -22,6 +22,7 @@ const Movies = () => {
       genre: movie.genre,
     }))
   );
+  const [searchInput, setInput] = useState("");
 
   const handleChange = (event, value) => {
     console.log("Page Changed", value);
@@ -34,6 +35,7 @@ const Movies = () => {
   };
 
   const handleGenre = (genre) => {
+    setInput("");
     setGenre(genre);
     setPage(1);
   };
@@ -48,14 +50,32 @@ const Movies = () => {
     setSort(sortColumn);
   };
 
+  const handleSearch = (event) => {
+    const value = event.target.value;
+    console.log(value);
+    setInput(value);
+  };
+
   // Get all movie genres
   const allGenres = allMovies.map((m) => m.genre.name);
   // Filter and get unique genres
   const uniqueGenres = [...new Set(allGenres)];
   // Get all movies in the genre;
   const filteredMovies = moviesInGenre(allMovies, genre);
-
-  const sortedMovies = filteredMovies
+  console.log("filtered", filteredMovies);
+  // Show movies matching search query
+  const searchFilteredMovies = filteredMovies.filter((m) => {
+    if (
+      m.title
+        .toLowerCase()
+        .replace(/\s/g, "")
+        .includes(searchInput.toLowerCase().replace(/\s/g, ""))
+    ) {
+      console.log("matches", m);
+      return m;
+    }
+  });
+  const sortedMovies = searchFilteredMovies
     .concat()
     .sort(orderBy([sortPath.path], [sortPath.order]));
 
@@ -74,6 +94,14 @@ const Movies = () => {
       >
         Add Movie
       </Button>
+      <TextField
+        label="Seach Movies"
+        id="outlined-start-adornment"
+        className="search-field"
+        value={searchInput}
+        variant="outlined"
+        onChange={handleSearch}
+      />
       <MoviesTable
         movies={movies}
         onDelete={handleDelete}
