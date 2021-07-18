@@ -88,6 +88,7 @@ export default function Register() {
     validAccount ? setDisable(false) : setDisable(true);
   }, [account]);
 
+  // Check input fields and sets error text
   useEffect(() => {
     const tempErrors = { ...errorFlag };
     const tempErrorText = { ...errorText };
@@ -97,18 +98,9 @@ export default function Register() {
         : (tempErrorText[errorName] = "");
       setErrorText(tempErrorText);
     });
-  }, [errorFlag]);
+  }, [account]);
 
-  const getErrorText = (fieldName) => {
-    const errorText = {
-      email: "Please enter a valid email",
-      username: "Username must be  only  contain alpha-numeric characters",
-      password:
-        "Password must contain lowercase and uppercase letters, a numeric character and a special symbol",
-    };
-    return errorText[fieldName];
-  };
-
+  // Validate input field
   const validateField = (input) => {
     const tempError = { ...errorFlag };
     const fieldName = Object.keys(input)[0];
@@ -121,6 +113,19 @@ export default function Register() {
     inputValid ? (tempError[fieldName] = false) : (tempError[fieldName] = true);
     setError(tempError);
   };
+
+  // TODO: Move to config
+  const getErrorText = (fieldName) => {
+    const errorText = {
+      email: "Please enter a valid email",
+      username: "Username must be  only  contain alpha-numeric characters",
+      password:
+        "Password must contain lowercase and uppercase letters, a numeric character and a special symbol",
+    };
+
+    return errorText[fieldName];
+  };
+
   // Handle Password and Email Change
   const handleChange = (event) => {
     const value = event.target.value;
@@ -133,13 +138,22 @@ export default function Register() {
   };
 
   // Submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(errorFlag);
-    const withError = Object.keys(errorFlag).some((k) => errorFlag[k]);
-    withError
-      ? console.error("ERROR Submitting form")
-      : console.log("Submitted");
+    console.log(account);
+    try {
+      await userService.register(account);
+    } catch (error) {
+      const { data: errorMessage, status } = error.response;
+      if (status === 400) {
+        const tempErrors = { ...error };
+        const tempErrorText = { ...errorText };
+        tempErrorText["email"] = errorMessage;
+        setErrorText(tempErrorText);
+        tempErrors["email"] = true;
+        setError(tempErrors);
+      }
+    }
   };
 
   return (
