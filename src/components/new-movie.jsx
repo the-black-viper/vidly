@@ -11,20 +11,15 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import {
-  titleSchema,
-  rateSchema,
-  stockSchema,
-  genreSchema,
-  newMovieSchema,
-} from "../utils/validateSchema";
-import { getMovies, saveMovie } from "../services/fakeMovieService";
+import { newMovieSchema } from "../utils/validateSchema";
+import { saveMovie } from "../services/movieService";
 import { MenuItem } from "@material-ui/core";
-import { useLocation } from "react-router-dom";
+import { useHistory, useLocation, useParams } from "react-router-dom";
+import { getMovie } from "../services/movieService";
+import { getGenres } from "../services/genreService";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
-  console.log(result);
   const noError = !Object.keys(result).includes("error");
   return noError;
 }
@@ -64,50 +59,18 @@ const useStyles = makeStyles((theme) => ({
 
 // New Movie Component
 export default function NewMovie(props) {
-  const movies = getMovies().map((movie) => ({
-    ...movie,
-    id: movie._id,
-    genre: movie.genre.name,
-  }));
-
-  console.log(movies);
-  // Get all movie genres
-  const allGenres = movies.map((m) => m.genre);
-  console.log(allGenres);
-  // Filter and get unique genres
-  const uniqueGenres = [...new Set(allGenres)];
-  console.log(uniqueGenres);
-
-  const findMovie = (movies, id) => {
-    const targetMovie = movies.find((movie) => movie.id === id);
-    return targetMovie;
-  };
-
-  const getMovieData = (props) => {
-    // Get the movie
-    const { match } = props;
-    const movieID = match.params.id;
-    const movie = findMovie(movies, movieID);
-    console.log(movie);
-    const tempAccount = { ...movie };
-    console.log(tempAccount);
-    return tempAccount;
-  };
-  const loc = useLocation();
-  console.log(loc);
-  props ? console.log("props present", props) : console.log("no props");
   const classes = useStyles();
-  const [account, setAccount] = useState(
-    // Check path
-    loc.pathname !== "/newmovie"
-      ? getMovieData(props)
-      : {
-          title: "",
-          genre: "",
-          numberInStock: "",
-          dailyRentalRate: "",
-        }
-  );
+  // Get Location object to get path
+  const loc = useLocation();
+  const params = useParams();
+  const history = useHistory();
+
+  const [account, setAccount] = useState({
+    title: "",
+    genreId: "",
+    numberInStock: "",
+    dailyRentalRate: "",
+  });
 
   const [errorFlag, setError] = useState({
     title: false,
@@ -116,63 +79,79 @@ export default function NewMovie(props) {
     dailyRentalRate: false,
   });
   const [disabledFlag, setDisable] = useState(false);
+  const [genres, setGenres] = useState([]);
 
-  // Hook to disable submit button while inputs are invalid
+  // Get genres
   useEffect(() => {
-    console.log(account);
-    // Normalize values in a temporary Values
-    const tempAccount = { ...account };
-    for (let key in tempAccount) {
-      try {
-        console.log(typeof tempAccount[key]);
-        if (typeof tempAccount[key] === "string")
-          tempAccount[key].replace(/\s/g, "");
-      } catch {
-        console.error("ERROR");
-      }
-    }
+    const getUniqueGenres = async () => {
+      // Get genres
+      const { data: genres } = await getGenres();
+      // const tempGenres = genres.map((g) => g.name);
+      setGenres(genres);
+    };
+    getUniqueGenres();
+  }, []);
 
+  // Get movies data
+  useEffect(() => {
+    const getMovieData = async () => {
+      const movieId = params.id;
+      if (loc.pathname !== "/newmovie") {
+        try {
+          const { data: movie } = await getMovie(movieId);
+          setAccount(mapToViewModel(movie));
+        } catch (error) {
+          history.replace("/notfound");
+        }
+      } else return;
+    };
+    getMovieData();
+  }, [loc.pathname, params.id, history]);
+
+  // Disable submit button while inputs are invalid
+  useEffect(() => {
+    const tempAccount = { ...account, title: account.title.replace(/\s/g, "") };
     const validAccount = validateInput(tempAccount, newMovieSchema);
     validAccount ? setDisable(false) : setDisable(true);
   }, [account]);
 
+  // Set Error flags
+  useEffect(() => {
+    const tempObject = { ...account, title: account.title.replace(/\s/g, "") };
+    const tempError = { ...errorFlag };
+    Object.entries(tempObject).forEach(([key, value]) => {
+      const input = { [key]: value };
+      const inputValid = validateInput(input, newMovieSchema);
+      inputValid ? (tempError[key] = false) : (tempError[key] = true);
+      setError(tempError);
+    });
+  }, [account]);
+
   // Handle input change
   const handleChange = (event) => {
-    let value = event.target.value;
+    const value = event.target.value;
     const name = event.target.name;
-    const newValue = value.split(" ").join("");
-    // if (typeof value === "string") value.replace(/\s/g, "");
-    const tempObject = { [name]: newValue };
-    const tempError = { ...errorFlag };
-    console.log(tempObject);
-    const inputValid =
-      name === "title"
-        ? validateInput(tempObject, titleSchema)
-        : name === "dailyRentalRate"
-        ? validateInput(tempObject, rateSchema)
-        : name === "genre"
-        ? validateInput(tempObject, genreSchema)
-        : name === "numberInStock"
-        ? validateInput(tempObject, stockSchema)
-        : console.error("ERROR");
-    console.log(tempError);
-    inputValid ? (tempError[name] = false) : (tempError[name] = true);
-    console.log(tempError);
-    setError(tempError);
-
     const tempAccount = { ...account, [name]: value };
-    // tempAccount[name] = value;
     setAccount(tempAccount);
   };
 
   // Submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(errorFlag);
     const withError = Object.keys(errorFlag).some((k) => errorFlag[k]);
     if (withError) return console.error("ERROR Submitting form");
-    console.log("Submitted", account);
     saveMovie(account);
+  };
+
+  // Reformat movie object to the accepted format
+  const mapToViewModel = (movie) => {
+    const newObj = {
+      title: movie.title,
+      genreId: movie.genre._id,
+      numberInStock: movie.numberInStock,
+      dailyRentalRate: movie.dailyRentalRate,
+    };
+    return newObj;
   };
 
   return (
@@ -208,18 +187,15 @@ export default function NewMovie(props) {
                 select
                 error={errorFlag.genre}
                 fullWidth
-                name="genre"
+                name="genreId"
                 variant="outlined"
                 label="Genre"
-                value={account.genre}
+                value={account.genreId}
                 onChange={handleChange}
               >
-                <MenuItem value="">
-                  <em></em>
-                </MenuItem>
-                {uniqueGenres.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
+                {genres.map((genre) => (
+                  <MenuItem key={genre._id} value={genre._id}>
+                    {genre.name}
                   </MenuItem>
                 ))}
               </TextField>

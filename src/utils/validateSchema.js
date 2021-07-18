@@ -34,28 +34,12 @@ const nameSchema = Joi.object({
   username: Joi.string().alphanum().min(3).max(10).required(),
 });
 
-const titleSchema = Joi.object({
-  title: Joi.string().alphanum().min(3).required(),
-});
-
-const genreSchema = Joi.object({
-  genre: Joi.string().alphanum().required(),
-});
-
-const rateSchema = Joi.object({
-  dailyRentalRate: Joi.number().min(0).max(100).precision(2).required(),
-});
-
-const stockSchema = Joi.object({
-  numberInStock: Joi.number().min(0).max(100).integer(),
-});
-
 const newMovieSchema = Joi.object({
   id: Joi.string().optional(),
   _id: Joi.string().alphanum(),
-  title: Joi.string().alphanum().min(3).required(),
-  genre: Joi.string().alphanum().required(),
-  dailyRentalRate: Joi.number().min(0).max(100).precision(2).required(),
+  title: Joi.string().alphanum().min(5),
+  genreId: Joi.string().alphanum(),
+  dailyRentalRate: Joi.number().min(0).max(100).precision(2),
   numberInStock: Joi.number().min(0).max(100).integer(),
   publishDate: Joi.date().optional(),
 });
@@ -72,15 +56,12 @@ const registerSchema = Joi.object({
 })
   .with("email", "password")
   .xor("password", "access_token");
+
 export {
   nameSchema,
   emailSchema,
   passwordSchema,
   loginSchema,
   registerSchema,
-  titleSchema,
-  rateSchema,
-  stockSchema,
-  genreSchema,
   newMovieSchema,
 };
