@@ -14,11 +14,12 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import {
-  nameSchema,
+  usernameSchema,
   emailSchema,
   passwordSchema,
   registerSchema,
 } from "../utils/validateSchema";
+import * as userService from "../services/userService";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
@@ -73,36 +74,59 @@ export default function Register() {
     email: false,
     password: false,
   });
+  const [errorText, setErrorText] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
   const [disabledFlag, setDisable] = useState(false);
 
   // Hook to disable submit button while inputs are invalid
-  const isInitialMount = useRef(true);
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      console.log(account);
-      const validAccount = validateInput(account, registerSchema);
-      validAccount ? setDisable(false) : setDisable(true);
-    }
+    console.log(account);
+    const validAccount = validateInput(account, registerSchema);
+    validAccount ? setDisable(false) : setDisable(true);
   }, [account]);
 
+  useEffect(() => {
+    const tempErrors = { ...errorFlag };
+    const tempErrorText = { ...errorText };
+    Object.entries(tempErrors).forEach(([errorName, enabled]) => {
+      enabled
+        ? (tempErrorText[errorName] = getErrorText(errorName))
+        : (tempErrorText[errorName] = "");
+      setErrorText(tempErrorText);
+    });
+  }, [errorFlag]);
+
+  const getErrorText = (fieldName) => {
+    const errorText = {
+      email: "Please enter a valid email",
+      username: "Username must be  only  contain alpha-numeric characters",
+      password:
+        "Password must contain lowercase and uppercase letters, a numeric character and a special symbol",
+    };
+    return errorText[fieldName];
+  };
+
+  const validateField = (input) => {
+    const tempError = { ...errorFlag };
+    const fieldName = Object.keys(input)[0];
+    const schema = {
+      username: usernameSchema,
+      email: emailSchema,
+      password: passwordSchema,
+    };
+    const inputValid = validateInput(input, schema[fieldName]);
+    inputValid ? (tempError[fieldName] = false) : (tempError[fieldName] = true);
+    setError(tempError);
+  };
   // Handle Password and Email Change
   const handleChange = (event) => {
     const value = event.target.value;
     const name = event.target.name;
     const tempObject = { [name]: value };
-    console.log(tempObject);
-    const tempError = { ...errorFlag };
-    const inputValid =
-      name === "email"
-        ? validateInput(tempObject, emailSchema)
-        : name === "username"
-        ? validateInput(tempObject, nameSchema)
-        : validateInput(tempObject, passwordSchema);
-    inputValid ? (tempError[name] = false) : (tempError[name] = true);
-    setError(tempError);
-
+    validateField(tempObject); // Validate individual field change
     const tempAccount = { ...account };
     tempAccount[name] = value;
     setAccount(tempAccount);
@@ -134,13 +158,14 @@ export default function Register() {
               <TextField
                 autoComplete="uname"
                 error={errorFlag.username}
+                helperText={errorText.username}
                 name="username"
                 variant="outlined"
                 required
                 fullWidth
                 id="username"
                 label="Username"
-                onChange={(event) => handleChange(event)}
+                onChange={handleChange}
                 autoFocus
               />
             </Grid>
@@ -148,19 +173,21 @@ export default function Register() {
               <TextField
                 variant="outlined"
                 error={errorFlag.email}
+                helperText={errorText.email}
                 required
                 fullWidth
                 id="email"
                 label="Email Address"
                 name="email"
                 autoComplete="email"
-                onChange={(event) => handleChange(event)}
+                onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
                 error={errorFlag.password}
+                helperText={errorText.password}
                 required
                 fullWidth
                 name="password"
@@ -168,7 +195,7 @@ export default function Register() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                onChange={(event) => handleChange(event)}
+                onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12}>

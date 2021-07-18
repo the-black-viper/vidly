@@ -30,7 +30,7 @@ const emailSchema = Joi.object({
     .required(),
 });
 
-const nameSchema = Joi.object({
+const usernameSchema = Joi.object({
   username: Joi.string().alphanum().min(3).max(10).required(),
 });
 
@@ -45,20 +45,16 @@ const newMovieSchema = Joi.object({
 });
 
 const registerSchema = Joi.object({
-  username: Joi.string().alphanum().min(3).max(10).required(),
-  email: Joi.string()
-    .email({
-      minDomainSegments: 2,
-      tlds: { allow: ["com", "net"] },
-    })
-    .required(),
+  username: Joi.string().alphanum().min(3).max(10),
+  email: Joi.string().email({
+    minDomainSegments: 2,
+    tlds: { allow: ["com", "net"] },
+  }),
   password: Joi.string().pattern(strongRegex),
-})
-  .with("email", "password")
-  .xor("password", "access_token");
+});
 
 export {
-  nameSchema,
+  usernameSchema,
   emailSchema,
   passwordSchema,
   loginSchema,
