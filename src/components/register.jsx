@@ -132,8 +132,7 @@ export default function Register() {
     const name = event.target.name;
     const tempObject = { [name]: value };
     validateField(tempObject); // Validate individual field change
-    const tempAccount = { ...account };
-    tempAccount[name] = value;
+    const tempAccount = { ...account, ...tempObject };
     setAccount(tempAccount);
   };
 

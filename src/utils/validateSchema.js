@@ -12,22 +12,24 @@ const loginSchema = Joi.object({
       tlds: { allow: ["com", "net"] },
     })
     .required(),
-  password: Joi.string().pattern(strongRegex),
+  password: Joi.string().min(3).max(100),
 })
   .with("email", "password")
   .xor("password", "access_token");
+
+const loginPasswordSchema = Joi.object({
+  password: Joi.string().min(3).max(100),
+});
 
 const passwordSchema = Joi.object({
   password: Joi.string().pattern(strongRegex).required(),
 });
 
 const emailSchema = Joi.object({
-  email: Joi.string()
-    .email({
-      minDomainSegments: 2,
-      tlds: { allow: ["com", "net"] },
-    })
-    .required(),
+  email: Joi.string().email({
+    minDomainSegments: 2,
+    tlds: { allow: ["com", "net"] },
+  }),
 });
 
 const usernameSchema = Joi.object({
@@ -57,6 +59,7 @@ export {
   usernameSchema,
   emailSchema,
   passwordSchema,
+  loginPasswordSchema,
   loginSchema,
   registerSchema,
   newMovieSchema,

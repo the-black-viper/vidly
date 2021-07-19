@@ -17,9 +17,11 @@ import {
   emailSchema,
   passwordSchema,
   loginSchema,
+  loginPasswordSchema,
 } from "../utils/validateSchema";
 import { useEffect } from "react";
 import { useRef } from "react";
+import { login } from "../services/authService";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
@@ -62,10 +64,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SignIn() {
+  const classes = useStyles();
   const [account, setAccount] = useState({ email: "", password: "" });
   const [errorFlag, setError] = useState({ email: false, password: false });
+  const [errorText, setErrorText] = useState({ email: "", password: "" });
   const [disabledFlag, setDisable] = useState(false);
-  const classes = useStyles();
 
   // Hook to disable submit button while inputs are invalid
   const isInitialMount = useRef(true);
@@ -78,33 +81,62 @@ export default function SignIn() {
     }
   }, [account]);
 
+  // Check input fields and sets error text
+  useEffect(() => {
+    const tempErrors = { ...errorFlag };
+    const tempErrorText = { ...errorText };
+    Object.entries(tempErrors).forEach(([errorName, enabled]) => {
+      console.log(errorName, enabled);
+      enabled
+        ? (tempErrorText[errorName] = "Invalid Input")
+        : (tempErrorText[errorName] = "");
+      setErrorText(tempErrorText);
+    });
+  }, [account]);
+
+  const validateField = (inputObject) => {
+    const tempError = { ...errorFlag };
+    const fieldName = Object.keys(inputObject)[0];
+    console.log(fieldName);
+    const schema = {
+      email: emailSchema,
+      password: loginPasswordSchema,
+    };
+    const inputValid = validateInput(inputObject, schema[fieldName]);
+    inputValid ? (tempError[fieldName] = false) : (tempError[fieldName] = true);
+    setError(tempError);
+  };
   // Handle Password and Email Change
   const handleChange = (event) => {
     const value = event.target.value;
     const name = event.target.name;
     const tempObject = { [name]: value };
-    console.log(tempObject);
-    const tempError = { ...errorFlag };
-    const inputValid =
-      name === "email"
-        ? validateInput(tempObject, emailSchema)
-        : validateInput(tempObject, passwordSchema);
-    inputValid ? (tempError[name] = false) : (tempError[name] = true);
-    setError(tempError);
-
-    const tempAccount = { ...account };
-    tempAccount[name] = value;
+    validateField(tempObject);
+    const tempAccount = { ...account, ...tempObject };
+    console.log(tempAccount);
     setAccount(tempAccount);
   };
 
   // Submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(errorFlag);
-    const withError = Object.keys(errorFlag).some((k) => errorFlag[k]);
-    withError
-      ? console.error("ERROR Submitting form")
-      : console.log("Submitted");
+    console.log(account);
+    const { email, password } = account;
+    try {
+      await login(email, password);
+      // const tempErrors = { ...errorFlag, email: false };
+      // setError(tempErrors);
+    } catch (error) {
+      const { data: errorMessage, status } = error.response;
+      if (status === 400) {
+        const tempErrors = { ...errorFlag };
+        const tempErrorText = { ...errorText };
+        tempErrorText["email"] = errorMessage;
+        setErrorText(tempErrorText);
+        tempErrors["email"] = true;
+        setError(tempErrors);
+      }
+    }
   };
 
   return (
@@ -121,6 +153,7 @@ export default function SignIn() {
           <TextField
             error={errorFlag.email}
             variant="outlined"
+            helperText={errorText.email}
             margin="normal"
             required
             fullWidth
