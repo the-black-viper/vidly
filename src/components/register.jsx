@@ -86,7 +86,7 @@ export default function Register() {
     console.log(account);
     const validAccount = validateInput(account, registerSchema);
     validAccount ? setDisable(false) : setDisable(true);
-  }, [account]);
+  }, []);
 
   // Check input fields and sets error text
   useEffect(() => {

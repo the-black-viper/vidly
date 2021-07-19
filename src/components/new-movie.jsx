@@ -115,23 +115,21 @@ export default function NewMovie(props) {
     validAccount ? setDisable(false) : setDisable(true);
   }, [account]);
 
-  // Set Error flags
-  useEffect(() => {
-    const tempObject = { ...account, title: account.title.replace(/\s/g, "") };
+  // Validate input field
+  const validateField = (inputObject) => {
+    const fieldName = Object.keys(inputObject)[0];
     const tempError = { ...errorFlag };
-    Object.entries(tempObject).forEach(([key, value]) => {
-      const input = { [key]: value };
-      const inputValid = validateInput(input, newMovieSchema);
-      inputValid ? (tempError[key] = false) : (tempError[key] = true);
-      setError(tempError);
-    });
-  }, [account]);
+    const inputValid = validateInput(inputObject, newMovieSchema);
+    inputValid ? (tempError[fieldName] = false) : (tempError[fieldName] = true);
+    setError(tempError);
+  };
 
   // Handle input change
   const handleChange = (event) => {
     const value = event.target.value;
     const name = event.target.name;
     const tempAccount = { ...account, [name]: value };
+    validateField(tempAccount);
     setAccount(tempAccount);
   };
 
