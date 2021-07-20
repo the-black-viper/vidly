@@ -1,8 +1,9 @@
 import { useEffect } from "react";
+import auth from "../services/authService";
 
 const Logout = () => {
   useEffect(() => {
-    localStorage.removeItem("token");
+    auth.logout();
     window.location = "/"; // Reload the page
   }, []);
 

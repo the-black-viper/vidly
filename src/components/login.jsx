@@ -20,7 +20,7 @@ import {
 } from "../utils/validateSchema";
 import { useEffect } from "react";
 import { useRef } from "react";
-import { login } from "../services/authService";
+import auth from "../services/authService";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
@@ -122,10 +122,7 @@ export default function SignIn() {
     console.log(account);
     const { email, password } = account;
     try {
-      const { data: jwt } = await login(email, password);
-      console.log(jwt);
-      localStorage.setItem("token", jwt);
-      // history.push("/");
+      await auth.login(email, password);
       window.location = "/"; // Reload page
     } catch (error) {
       const { data: errorMessage, status } = error.response;

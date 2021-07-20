@@ -20,6 +20,7 @@ import {
   registerSchema,
 } from "../utils/validateSchema";
 import * as userService from "../services/userService";
+import auth from "../services/authService";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
@@ -143,7 +144,7 @@ export default function Register() {
     try {
       const response = await userService.register(account);
       console.log(response);
-      localStorage.setItem("token", response.headers["x-auth-token"]);
+      auth.loginWithJWT(response.headers["x-auth-token"]);
       window.location = "/"; // Auto login user and Reloads page
     } catch (error) {
       const { data: errorMessage, status } = error.response;
