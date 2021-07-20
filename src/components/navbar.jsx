@@ -1,7 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const NavBar = () => {
+const NavBar = ({ user }) => {
+  console.log(user);
   return (
     <ul>
       <li>

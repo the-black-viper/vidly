@@ -3,7 +3,6 @@ import Joi from "joi";
 const strongRegex = new RegExp(
   "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})"
 );
-const weakRegex = new RegExp("^[a-zA-Z0-9]{3,30}$");
 
 const loginSchema = Joi.object({
   email: Joi.string()

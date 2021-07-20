@@ -1,12 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
-import loggerService from "./services/loggerService";
+import initializeLogger from "./services/loggerService";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 
-loggerService.init();
+initializeLogger();
 
 ReactDOM.render(
   <BrowserRouter>

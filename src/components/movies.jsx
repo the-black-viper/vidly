@@ -1,6 +1,5 @@
 import React from "react";
 import { useEffect } from "react";
-import jwtDecode from "jwt-decode";
 import MoviesTable from "./movies-table";
 import MoviePagination from "./pagination";
 import Paginate from "../utils/paginate";
@@ -21,10 +20,6 @@ const Movies = () => {
   const [searchInput, setInput] = useState("");
   const [allMovies, setMovies] = useState([]);
   const [genres, setGenres] = useState([]);
-
-  const jwt = localStorage.getItem("token");
-  const user = jwtDecode(jwt);
-  console.log(user);
 
   // Get movies
   useEffect(() => {
@@ -93,13 +88,10 @@ const Movies = () => {
 
   // Show movies matching search query
   const searchFilteredMovies = genreFiltered.filter((m) => {
-    if (
-      m.title
-        .toLowerCase()
-        .replace(/\s/g, "")
-        .includes(searchInput.toLowerCase().replace(/\s/g, ""))
-    )
-      return m;
+    return m.title
+      .toLowerCase()
+      .replace(/\s/g, "")
+      .includes(searchInput.toLowerCase().replace(/\s/g, ""));
   });
 
   const sortedMovies = searchFilteredMovies

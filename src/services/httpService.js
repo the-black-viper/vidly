@@ -10,10 +10,11 @@ import axios from "axios";
 //   }
 //   return Promise.reject(error); // Goes to the try catch block
 // });
-
-export default {
+const http = {
   get: axios.get,
   post: axios.post,
   put: axios.put,
   delete: axios.delete,
 };
+
+export default http;
