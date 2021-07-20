@@ -20,6 +20,7 @@ import {
   registerSchema,
 } from "../utils/validateSchema";
 import * as userService from "../services/userService";
+import { useHistory } from "react-router-dom";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
@@ -81,6 +82,8 @@ export default function Register() {
   });
   const [disabledFlag, setDisable] = useState(false);
 
+  const history = useHistory();
+
   // Hook to disable submit button while inputs are invalid
   useEffect(() => {
     console.log(account);
@@ -141,7 +144,10 @@ export default function Register() {
     e.preventDefault();
     console.log(account);
     try {
-      await userService.register(account);
+      const response = await userService.register(account);
+      console.log(response);
+      localStorage.setItem("token", response.headers["x-auth-token"]);
+      history.push("/");
     } catch (error) {
       const { data: errorMessage, status } = error.response;
       if (status === 400) {

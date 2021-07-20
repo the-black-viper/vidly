@@ -22,6 +22,7 @@ import {
 import { useEffect } from "react";
 import { useRef } from "react";
 import { login } from "../services/authService";
+import { useHistory } from "react-router-dom";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
@@ -70,6 +71,7 @@ export default function SignIn() {
   const [errorText, setErrorText] = useState({ email: "", password: "" });
   const [disabledFlag, setDisable] = useState(false);
 
+  const history = useHistory();
   // Hook to disable submit button while inputs are invalid
   const isInitialMount = useRef(true);
   useEffect(() => {
@@ -123,9 +125,10 @@ export default function SignIn() {
     console.log(account);
     const { email, password } = account;
     try {
-      await login(email, password);
-      // const tempErrors = { ...errorFlag, email: false };
-      // setError(tempErrors);
+      const { data: jwt } = await login(email, password);
+      console.log(jwt);
+      localStorage.setItem("token", jwt);
+      history.push("/");
     } catch (error) {
       const { data: errorMessage, status } = error.response;
       if (status === 400) {

@@ -1,4 +1,6 @@
 import React from "react";
+import { useEffect } from "react";
+import jwtDecode from "jwt-decode";
 import MoviesTable from "./movies-table";
 import MoviePagination from "./pagination";
 import Paginate from "../utils/paginate";
@@ -9,18 +11,22 @@ import { Button, TextField } from "@material-ui/core";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { getGenres } from "../services/genreService";
-import { useEffect } from "react";
 import { deleteMovie, fetchMovies } from "../services/movieService";
 
 const Movies = () => {
   const moviesPerPage = 5;
   const [currentPage, setPage] = useState(1);
   const [genre, setGenre] = useState("all");
-  const [someMovies, setSomeMovies] = useState(null);
   const [sortPath, setSort] = useState({ path: undefined, order: "asc" });
   const [searchInput, setInput] = useState("");
   const [allMovies, setMovies] = useState([]);
+  const [genres, setGenres] = useState([]);
 
+  const jwt = localStorage.getItem("token");
+  const user = jwtDecode(jwt);
+  console.log(user);
+
+  // Get movies
   useEffect(() => {
     const getMovies = async () => {
       const movies = await fetchMovies();
@@ -30,9 +36,18 @@ const Movies = () => {
     getMovies();
   }, []);
 
-  console.log(someMovies);
-  console.log(allMovies);
+  // Get genres
+  useEffect(() => {
+    const getUniqueGenres = async () => {
+      // Get genres
+      const { data: genres } = await getGenres();
+      const tempGenres = genres.map((g) => g.name);
+      setGenres(tempGenres);
+    };
+    getUniqueGenres();
+  }, []);
 
+  console.log(genres);
   const handleChange = (event, value) => {
     console.log("Page Changed", value);
     setPage(value);
@@ -72,11 +87,6 @@ const Movies = () => {
     console.log(value);
     setInput(value);
   };
-
-  // Get all movie genres
-  const allGenres = allMovies.map((m) => m.genre.name);
-  // Filter and get unique genres
-  const uniqueGenres = [...new Set(allGenres)];
 
   // Get all movies in the genre;
   const genreFiltered = moviesInGenre(allMovies, genre);
@@ -130,7 +140,7 @@ const Movies = () => {
         onChange={handleChange}
         pageSize={moviesPerPage}
       />
-      <GenreFilter onChange={handleGenre} genres={uniqueGenres} />
+      <GenreFilter onChange={handleGenre} genres={genres} />
     </React.Fragment>
   );
 };
