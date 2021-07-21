@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect, useRef } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -18,9 +19,8 @@ import {
   loginSchema,
   loginPasswordSchema,
 } from "../utils/validateSchema";
-import { useEffect } from "react";
-import { useRef } from "react";
 import auth from "../services/authService";
+import { Redirect } from "react-router-dom";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SignIn() {
+export default function SignIn(props) {
   const classes = useStyles();
   const [account, setAccount] = useState({ email: "", password: "" });
   const [errorFlag, setError] = useState({ email: false, password: false });
@@ -123,10 +123,15 @@ export default function SignIn() {
     const { email, password } = account;
     try {
       await auth.login(email, password);
-      window.location = "/"; // Reload page
+      const { state } = props.location;
+      console.log(props);
+      console.log(state);
+      // console.log(state.from);
+      window.location = state ? state.from.pathname : "/"; // Redirect user to previous page or Reload page
     } catch (error) {
-      const { data: errorMessage, status } = error.response;
-      if (status === 400) {
+      console.log(error);
+      const { data: errorMessage } = error.response;
+      if (error.response.status === 400) {
         const tempErrors = { ...errorFlag };
         const tempErrorText = { ...errorText };
         tempErrorText["email"] = errorMessage;
@@ -137,6 +142,7 @@ export default function SignIn() {
     }
   };
 
+  if (auth.getUserToken()) return <Redirect to="/" />;
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />

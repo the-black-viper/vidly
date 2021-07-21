@@ -8,6 +8,9 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { Button } from "@material-ui/core";
 import { Link } from "react-router-dom";
+import auth from "../services/authService";
+import { useEffect } from "react";
+import { useState } from "react";
 
 const get = (obj, path, defValue) => {
   // If path is not defined or it has false value
@@ -25,6 +28,8 @@ const get = (obj, path, defValue) => {
 };
 
 const MoviesTable = ({ movies, sortColumn, onSort, onDelete }) => {
+  console.log(movies);
+  const [user, setUser] = useState(auth.getUserToken());
   const sortPaths = [
     {
       path: "title",
@@ -56,6 +61,71 @@ const MoviesTable = ({ movies, sortColumn, onSort, onDelete }) => {
       },
     },
   ];
+  // const [sortPaths, setCols] = useState([
+  //   {
+  //     path: "title",
+  //     label: "Title",
+  //     content: (movie) => {
+  //       return <Link to={`/movies/${movie._id}`}>{movie.title}</Link>;
+  //     },
+  //   },
+  //   { path: "genre.name", label: "Genre" },
+  //   { path: "dailyRentalRate", label: "Rental Rate" },
+  //   { path: "numberInStock", label: "Stock" },
+  //   {
+  //     key: "button",
+  //     path: "",
+  //     label: "",
+  //     content: (item) => {
+  //       return (
+  //         <Button
+  //           onClick={() => {
+  //             console.log("clicked", item);
+  //             onDelete(item._id);
+  //           }}
+  //           variant="contained"
+  //           color="secondary"
+  //         >
+  //           Delete
+  //         </Button>
+  //       );
+  //     },
+  //   },
+  // ]);
+
+  const deleteColumn = {
+    key: "button",
+    path: "",
+    label: "",
+    content: (item) => {
+      return (
+        <Button
+          onClick={() => {
+            console.log("clicked", item);
+            onDelete(item._id);
+          }}
+          variant="contained"
+          color="secondary"
+        >
+          Delete
+        </Button>
+      );
+    },
+  };
+
+  console.log("before", sortPaths);
+
+  // useEffect(() => {
+  //   const constructor = () => {
+  //     if (user && user.isAdmin) {
+  //       const tempPaths = sortPaths;
+  //       tempPaths.push(deleteColumn);
+  //       setCols(tempPaths);
+  //     }
+  //     return null;
+  //   };
+  //   constructor();
+  // },[]);
 
   const renderCell = (movie, column) => {
     if (column.content) return column.content(movie);

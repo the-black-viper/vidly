@@ -12,6 +12,7 @@ import Logout from "./components/logout";
 import NotFound from "./components/notFound";
 import auth from "./services/authService";
 import "./App.css";
+import ProtectedRoute from "./components/protectedRoute";
 
 function App() {
   const [user, setUser] = useState(undefined);
@@ -24,16 +25,18 @@ function App() {
 
   return (
     <div className="App">
-      {/* <NavBar user={user} /> */}
       <NavBar2 className="Navbar" user={user} />
       <div className="content">
         <Switch>
           <Route path="/logout" component={Logout} />
           <Route path="/register" component={Register} />
           <Route path="/login" component={SignIn} />
-          <Route path="/movies/:id" component={NewMovie} />
-          <Route path="/newmovie" component={NewMovie} />
-          <Route path="/movies" component={Movies} />
+          <ProtectedRoute path="/movies/:id" component={NewMovie} />
+          <ProtectedRoute path="/newmovie" component={NewMovie} />
+          <Route
+            path="/movies"
+            render={(props) => <Movies {...props} user={user} />}
+          />
           <Redirect from="/" exact to="/movies" />
           <Route path="/customers" component={Customer} />
           <Route path="/not-found" component={NotFound} />

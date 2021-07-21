@@ -1,5 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
+import { useHistory, useLocation, useParams } from "react-router-dom";
+import Joi from "joi";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -14,12 +16,12 @@ import Container from "@material-ui/core/Container";
 import { newMovieSchema } from "../utils/validateSchema";
 import { saveMovie } from "../services/movieService";
 import { MenuItem } from "@material-ui/core";
-import { useHistory, useLocation, useParams } from "react-router-dom";
 import { getMovie } from "../services/movieService";
 import { getGenres } from "../services/genreService";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
+  console.log(result);
   const noError = !Object.keys(result).includes("error");
   return noError;
 }
@@ -108,8 +110,17 @@ export default function NewMovie(props) {
     getMovieData();
   }, [loc.pathname, params.id, history]);
 
+  // Define validation schema
+  const schema = {
+    title: Joi.string().alphanum().min(5),
+    genreId: Joi.string().alphanum().optional(),
+    dailyRentalRate: Joi.number().min(0).max(100).precision(2),
+    numberInStock: Joi.number().min(0).max(100).integer(),
+  };
+
   // Disable submit button while inputs are invalid
   useEffect(() => {
+    console.log("use Effect running");
     const tempAccount = { ...account, title: account.title.replace(/\s/g, "") };
     const validAccount = validateInput(tempAccount, newMovieSchema);
     validAccount ? setDisable(false) : setDisable(true);
@@ -117,9 +128,15 @@ export default function NewMovie(props) {
 
   // Validate input field
   const validateField = (inputObject) => {
+    console.log(inputObject);
     const fieldName = Object.keys(inputObject)[0];
+    const tempSchema = Joi.object({
+      [fieldName]: schema[fieldName],
+    });
+    console.log(tempSchema);
     const tempError = { ...errorFlag };
-    const inputValid = validateInput(inputObject, newMovieSchema);
+    const inputValid = validateInput(inputObject, tempSchema);
+    console.log(inputValid);
     inputValid ? (tempError[fieldName] = false) : (tempError[fieldName] = true);
     setError(tempError);
   };
@@ -128,8 +145,10 @@ export default function NewMovie(props) {
   const handleChange = (event) => {
     const value = event.target.value;
     const name = event.target.name;
+    const newValue = name === "title" ? value.replace(/\s/g, "") : value;
+    const tempObject = { [name]: newValue };
+    validateField(tempObject);
     const tempAccount = { ...account, [name]: value };
-    validateField(tempAccount);
     setAccount(tempAccount);
   };
 
@@ -138,7 +157,13 @@ export default function NewMovie(props) {
     e.preventDefault();
     const withError = Object.keys(errorFlag).some((k) => errorFlag[k]);
     if (withError) return console.error("ERROR Submitting form");
-    saveMovie(account);
+    console.log(account);
+    try {
+      saveMovie(account);
+    } catch (err) {
+      alert("Something went wrong");
+    }
+    history.push("/");
   };
 
   // Reformat movie object to the accepted format

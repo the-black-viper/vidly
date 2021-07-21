@@ -22,10 +22,12 @@ export function deleteMovie(movieId) {
 export function saveMovie(movie) {
   console.log(movie);
   if (movie._id) {
+    console.log("Updating Movie", movie._id);
     const movieObj = { ...movie };
     delete movieObj._id;
     http.put(movieUrl(movie._id), movieObj);
   }
+  console.log("Adding new movie");
   return http.post(apiEndpoint, movie);
 }
 

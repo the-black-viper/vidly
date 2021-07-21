@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import { getGenres } from "../services/genreService";
 import { deleteMovie, fetchMovies } from "../services/movieService";
 
-const Movies = () => {
+const Movies = ({ user }) => {
   const moviesPerPage = 5;
   const [currentPage, setPage] = useState(1);
   const [genre, setGenre] = useState("all");
@@ -53,9 +53,11 @@ const Movies = () => {
     const originalMovies = allMovies;
     setMovies(originalMovies.filter((m) => m._id !== movieID));
     try {
+      console.log("Attempting to delete movie");
       deleteMovie(movieID);
     } catch (error) {
-      if (error.response && error.response === "404")
+      console.log("Error deleting movie");
+      if (error.response && error.response.status === "404")
         alert("Movie may have already been deleted");
       setMovies(originalMovies);
     }
@@ -105,14 +107,16 @@ const Movies = () => {
 
   return (
     <React.Fragment>
-      <Button
-        variant="contained"
-        color="primary"
-        component={Link}
-        to="/newmovie"
-      >
-        Add Movie
-      </Button>
+      {user && (
+        <Button
+          variant="contained"
+          color="primary"
+          component={Link}
+          to="/newmovie"
+        >
+          Add Movie
+        </Button>
+      )}
       <TextField
         label="Seach Movies"
         id="outlined-start-adornment"
