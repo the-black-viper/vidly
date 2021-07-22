@@ -1,6 +1,7 @@
 // import "./App.css";
 import { useEffect, useState } from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
+import auth from "./services/authService";
 import Movies from "./components/movies";
 import NavBar2 from "./components/appbar";
 import NewMovie from "./components/new-movie";
@@ -10,9 +11,8 @@ import SignIn from "./components/login";
 import Register from "./components/register";
 import Logout from "./components/logout";
 import NotFound from "./components/notFound";
-import auth from "./services/authService";
-import "./App.css";
 import ProtectedRoute from "./components/protectedRoute";
+import "./App.css";
 
 function App() {
   const [user, setUser] = useState(undefined);
