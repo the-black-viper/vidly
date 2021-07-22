@@ -24,7 +24,6 @@ import auth from "../services/authService";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
-  console.log(result);
   const noError = !Object.keys(result).includes("error");
   return noError;
 }
@@ -84,7 +83,6 @@ export default function Register() {
 
   // Hook to disable submit button while inputs are invalid
   useEffect(() => {
-    console.log(account);
     const validAccount = validateInput(account, registerSchema);
     validAccount ? setDisable(false) : setDisable(true);
   }, [account]);
@@ -140,10 +138,8 @@ export default function Register() {
   // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(account);
     try {
       const response = await userService.register(account);
-      console.log(response);
       auth.loginWithJWT(response.headers["x-auth-token"]);
       window.location = "/"; // Auto login user and Reloads page
     } catch (error) {

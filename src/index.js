@@ -8,6 +8,7 @@ import { BrowserRouter } from "react-router-dom";
 
 initializeLogger();
 
+console.log(process.env.REACT_APP_NAME);
 ReactDOM.render(
   <BrowserRouter>
     <App />

@@ -51,9 +51,14 @@ const Movies = ({ user }) => {
   const handleDelete = (movieID) => {
     console.log(movieID);
     const originalMovies = allMovies;
+    console.log(originalMovies);
+    const tempMovies = originalMovies.filter((m) => m._id !== movieID);
+    console.log(tempMovies);
     setMovies(originalMovies.filter((m) => m._id !== movieID));
+
     try {
       console.log("Attempting to delete movie");
+      console.log(allMovies);
       deleteMovie(movieID);
     } catch (error) {
       console.log("Error deleting movie");

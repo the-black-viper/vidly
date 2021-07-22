@@ -35,16 +35,6 @@ const usernameSchema = Joi.object({
   username: Joi.string().alphanum().min(3).max(10).required(),
 });
 
-const titleSchema = Joi.object({ title: Joi.string().alphanum().min(5) });
-
-const genreIdScehma = Joi.object({
-  genreId: Joi.string().alphanum().optional(),
-});
-
-const rateSchema = Joi.object({
-  dailyRentalRate: Joi.number().min(0).max(100).precision(2),
-});
-
 const newMovieSchema = Joi.object({
   id: Joi.string().optional(),
   _id: Joi.string().alphanum(),

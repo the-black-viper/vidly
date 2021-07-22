@@ -24,7 +24,6 @@ import { Redirect } from "react-router-dom";
 
 function validateInput(input, schema) {
   const result = schema.validate(input);
-  console.log(result);
   const noError = !Object.keys(result).includes("error");
   return noError;
 }
@@ -85,7 +84,6 @@ export default function SignIn(props) {
     const tempErrors = { ...errorFlag };
     const tempErrorText = { ...errorText };
     Object.entries(tempErrors).forEach(([errorName, enabled]) => {
-      console.log(errorName, enabled);
       enabled
         ? (tempErrorText[errorName] = "Invalid Input")
         : (tempErrorText[errorName] = "");
@@ -96,7 +94,6 @@ export default function SignIn(props) {
   const validateField = (inputObject) => {
     const tempError = { ...errorFlag };
     const fieldName = Object.keys(inputObject)[0];
-    console.log(fieldName);
     const schema = {
       email: emailSchema,
       password: loginPasswordSchema,
@@ -112,24 +109,18 @@ export default function SignIn(props) {
     const tempObject = { [name]: value };
     validateField(tempObject);
     const tempAccount = { ...account, ...tempObject };
-    console.log(tempAccount);
     setAccount(tempAccount);
   };
 
   // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(account);
     const { email, password } = account;
     try {
       await auth.login(email, password);
       const { state } = props.location;
-      console.log(props);
-      console.log(state);
-      // console.log(state.from);
       window.location = state ? state.from.pathname : "/"; // Redirect user to previous page or Reload page
     } catch (error) {
-      console.log(error);
       const { data: errorMessage } = error.response;
       if (error.response.status === 400) {
         const tempErrors = { ...errorFlag };

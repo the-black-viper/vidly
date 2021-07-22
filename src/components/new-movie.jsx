@@ -157,7 +157,6 @@ export default function NewMovie(props) {
     e.preventDefault();
     const withError = Object.keys(errorFlag).some((k) => errorFlag[k]);
     if (withError) return console.error("ERROR Submitting form");
-    console.log(account);
     try {
       saveMovie(account);
     } catch (err) {

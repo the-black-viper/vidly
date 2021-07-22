@@ -7,7 +7,6 @@ axios.interceptors.response.use(null, (error) => {
     error.response.status >= 400 &&
     error.response.status < 500;
   if (!expectedError) {
-    console.log("Logging Error", error);
     alert("Unexpected error occured");
   }
   return Promise.reject(error); // Goes to the try catch block
