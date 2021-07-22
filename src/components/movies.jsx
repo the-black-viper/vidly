@@ -25,7 +25,6 @@ const Movies = ({ user }) => {
   useEffect(() => {
     const getMovies = async () => {
       const movies = await fetchMovies();
-      console.log(movies);
       setMovies(movies);
     };
     getMovies();
@@ -42,26 +41,18 @@ const Movies = ({ user }) => {
     getUniqueGenres();
   }, []);
 
-  console.log(genres);
   const handleChange = (event, value) => {
-    console.log("Page Changed", value);
     setPage(value);
   };
 
   const handleDelete = (movieID) => {
-    console.log(movieID);
     const originalMovies = allMovies;
-    console.log(originalMovies);
     const tempMovies = originalMovies.filter((m) => m._id !== movieID);
-    console.log(tempMovies);
     setMovies(originalMovies.filter((m) => m._id !== movieID));
 
     try {
-      console.log("Attempting to delete movie");
-      console.log(allMovies);
       deleteMovie(movieID);
     } catch (error) {
-      console.log("Error deleting movie");
       if (error.response && error.response.status === "404")
         alert("Movie may have already been deleted");
       setMovies(originalMovies);
@@ -75,18 +66,15 @@ const Movies = ({ user }) => {
   };
 
   const handleSort = (path, order) => {
-    console.log("current order:", order);
     const sortColumn = { path, order };
     if (sortPath.path === path) {
       sortColumn.order = sortColumn.order === "asc" ? "desc" : "asc";
     }
-    console.log(sortColumn);
     setSort(sortColumn);
   };
 
   const handleSearch = (event) => {
     const value = event.target.value;
-    console.log(value);
     setInput(value);
   };
 
