@@ -47,7 +47,6 @@ const Movies = ({ user }) => {
 
   const handleDelete = (movieID) => {
     const originalMovies = allMovies;
-    const tempMovies = originalMovies.filter((m) => m._id !== movieID);
     setMovies(originalMovies.filter((m) => m._id !== movieID));
 
     try {
